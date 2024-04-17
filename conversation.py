@@ -40,7 +40,6 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
         tool_call = response.content[1]
         function_name = tool_call.name
         function_args = tool_call.input
-        function_id = tool_call.id
         if function_name == 'ask_database':
             sql_query = function_args['query']
             print(f'SQL Query -> {sql_query}')
