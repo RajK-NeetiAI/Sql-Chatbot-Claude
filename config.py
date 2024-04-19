@@ -11,6 +11,10 @@ MYSQL_PORT = os.getenv('MYSQL_PORT')
 MYSQL_DB_NAME = os.getenv('MYSQL_DB_NAME')
 CLOUDE_MODEL = os.getenv('CLOUDE_MODEL')
 CLOUDE_API_KEY = os.getenv('CLOUDE_API_KEY')
+POSTGRES_HOST = 'localhost'
+POSTGRES_DB_NAME = 'sql_chatbot'
+POSTGRES_USER = 'baeldung'
+POSTGRES_PASSWORD = 'baeldung'
 
 cwd = os.getcwd()
 

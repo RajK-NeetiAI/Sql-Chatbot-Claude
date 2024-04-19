@@ -1,10 +1,11 @@
 import os
 import json
 
-from database_functions import get_table_names, get_column_names
+from postgresql_functions import get_table_names, get_column_names
 import config
 
 tables_name = get_table_names()
+print(tables_name)
 
 for tn in tables_name:
     print(f'Creating data definition for {tn}.')
