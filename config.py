@@ -4,17 +4,12 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
-MYSQL_USER = os.getenv('MYSQL_USER')
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD')
-MYSQL_HOST = os.getenv('MYSQL_HOST')
-MYSQL_PORT = os.getenv('MYSQL_PORT')
-MYSQL_DB_NAME = os.getenv('MYSQL_DB_NAME')
 CLOUDE_MODEL = os.getenv('CLOUDE_MODEL')
 CLOUDE_API_KEY = os.getenv('CLOUDE_API_KEY')
-POSTGRES_HOST = 'localhost'
-POSTGRES_DB_NAME = 'sql_chatbot'
-POSTGRES_USER = 'baeldung'
-POSTGRES_PASSWORD = 'baeldung'
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_DB_NAME = os.getenv('POSTGRES_DB_NAME')
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
 
 cwd = os.getcwd()
 

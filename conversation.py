@@ -8,7 +8,7 @@ tools = get_tools(get_database_schema_string(),
                   get_database_definitions())
 
 
-def format_chat_history(chat_history: list[list], query: str) -> list[list]:
+def format_chat_history(chat_history: list[tuple[str, str]], query: str) -> list[tuple[str, str]]:
     formatted_chat_history = []
     for ch in chat_history:
         formatted_chat_history.append({
@@ -36,6 +36,7 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
         system=get_system_prompt(),
         tools=tools
     )
+    print(response)
     if len(response.content) > 1:
         tool_call = response.content[1]
         function_name = tool_call.name
@@ -43,7 +44,7 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
         if function_name == 'ask_database':
             sql_query = function_args['query']
             print(f'SQL Query -> {sql_query}')
-            sql_response = execute_query(sql_query)
+            sql_response = run_execute_database_query(sql_query)
             print(f'SQL Response -> {sql_response}')
             if sql_response == '':
                 formatted_chat_history = [{

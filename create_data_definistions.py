@@ -1,10 +1,10 @@
 import os
 import json
 
-from postgresql_functions import get_table_names, get_column_names
+from database_functions import get_tables_name, get_columns_name
 import config
 
-tables_name = get_table_names()
+tables_name = get_tables_name()
 print(tables_name)
 
 for tn in tables_name:
@@ -19,7 +19,7 @@ for tn in tables_name:
             }
         ]
     }
-    columns = get_column_names(tn)
+    columns = get_columns_name(tn)
     for column in columns:
         data_definitions['tables'][0]['columns'].append(
             {

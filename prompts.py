@@ -11,14 +11,13 @@ def get_tools(database_schema_string: str, database_definitions: str) -> list[di
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": f"""MySQL query extracting info to answer the user's question. \
-MySQL should be written using this database schema: \
+                        "description": f"""PostgreSQL query extracting info to answer the user's question. \
+PostgreSQL should be written using this database schema: \
 {database_schema_string} \
-The query should be returned in plain text, not in JSON. \
-Consider today's date as {datetime.now().strftime("%b %d, %Y")}. \
 Don't assume any column names that are not in the database schema, use the \
-following data definitions instead: \
-{database_definitions}"""
+following data definitions instead: {database_definitions} \
+The query should be returned in plain text, not in JSON. \
+Use today's date {datetime.now()}."""
                     }
                 },
                 "required": ["query"],
