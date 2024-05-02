@@ -1,58 +1,75 @@
-import anthropic
+import os
+import pandas as pd
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import config
 
-client = anthropic.Anthropic(
-    api_key=config.CLOUDE_API_KEY
-)
 
-response = client.beta.tools.messages.create(
-    model=config.CLOUDE_MODEL,
-    max_tokens=1024,
-    tools=[
-        {
-            "name": "get_weather",
-            "description": "Get the current weather in a given location",
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA"
-                    },
-                    "unit": {
-                        "type": "string",
-                        "enum": ["celsius", "fahrenheit"],
-                        "description": "The unit of temperature, either \"celsius\" or \"fahrenheit\""
-                    }
-                },
-                "required": ["location"]
-            }
-        }
-    ],
-    messages=[
-        {
-            "role": "user", "content": "What is the weather like today?"
-        },
-        {
-            "role": "assistant",
-            "content": [
-                {
-                    "type": "text",
-                    "text": "<thinking>I need to use get_weather, and the user wants SF, which is likely San Francisco, CA.</thinking>"
-                },
-                {
-                    "type": "tool_use",
-                    "id": "msg_01QTz7uReVbyUE8j7NSyjtfT",
-                    "name": "get_weather",
-                    "input": {"location": "San Francisco, CA", "unit": "celsius"}
-                }
-            ]
-        },
-        {
-            "role": "user", "content": "I am here in gandhinagar, gujarat"
-        }
-    ]
-)
+def create_database(cursor, db_name):
+    cursor.execute(f"CREATE DATABASE {db_name}")
+    print(f"Database {db_name} created successfully.")
 
-print(response)
+
+def escape_quotes(value):
+    return str(value).replace("'", "''")
+
+
+def create_table_from_csv(cursor, csv_file, table_name):
+    # Read the CSV file
+    df = pd.read_csv(csv_file)
+
+    # Create a table
+    columns_with_types = ", ".join([f"{col} TEXT" for col in df.columns])
+    create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_with_types})"
+    cursor.execute(create_table_query)
+    print(f"Table {table_name} created successfully.")
+
+    # Then in your insertion loop:
+    for index, row in df.iterrows():
+        columns = ', '.join(df.columns)
+        values = ', '.join([f"'{escape_quotes(value)}'" for value in row])
+        insert_query = f"INSERT INTO {table_name} ({columns}) VALUES ({values})"
+        cursor.execute(insert_query)
+
+
+def main():
+    # Connection parameters - update these with your details
+    user = config.POSTGRES_USER
+    password = config.POSTGRES_PASSWORD
+    host = config.POSTGRES_HOST
+
+    # Connect to PostgreSQL server
+    conn = psycopg2.connect(dbname='postgres', user=user,
+                            password=password, host=host)
+    conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cursor = conn.cursor()
+
+    # Create a new database
+    db_name = 'new_database'
+    create_database(cursor, db_name)
+
+    # Connect to the new database
+    conn.close()
+    conn = psycopg2.connect(dbname=db_name, user=user,
+                            password=password, host=host)
+    cursor = conn.cursor()
+
+    # Path to the directory containing CSV files
+    path_to_csv_directory = 'Tables/'
+
+    # Process each CSV file
+    for csv_file in os.listdir(path_to_csv_directory):
+        if csv_file.endswith('.csv'):
+            table_name = os.path.splitext(csv_file)[0]
+            create_table_from_csv(cursor, os.path.join(
+                path_to_csv_directory, csv_file), table_name)
+
+    # Close the connection
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()

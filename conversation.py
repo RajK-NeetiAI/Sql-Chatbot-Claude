@@ -62,8 +62,8 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
             else:
                 formatted_chat_history = [{
                     "role": "user",
-                    "content": f"""Convert the following MySQL data into natural language conversation, \
-keep the response short and concise and never mention id of the MySQL data. \
+                    "content": f"""Convert the following PostgreSQL data into natural language conversation, \
+keep the response short and concise and never mention id of the PostgreSQL data. \
 Consider today's date as {datetime.now().strftime("%b %d, %Y")}. \
 If there is a course URL in the SQL data only then provide it in the answer otherwise don't mention the URL \
 in the awnser. SQL data: {sql_response}"""}]
