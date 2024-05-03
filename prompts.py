@@ -19,6 +19,7 @@ def get_tools(database_schema_string: str, database_definitions: str) -> list[di
 
 # Instructions: \
 # 1. Construct an SQL query using only the tables and columns listed in the provided schema. \
+# 2. When comparing string use LIKE to maximise the search. \
 # 2. Ensure the query avoids assumptions about non-existent columns. \
 # 3. Consider performance and security best practices, such as avoiding SQL injection risks. \
 # 4. Format the query in plain text for direct execution in a PostgreSQL database. \

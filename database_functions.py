@@ -1,3 +1,4 @@
+from psycopg2.extras import RealDictCursor
 import datetime
 import decimal
 import os
@@ -135,17 +136,15 @@ def serialize_data(obj) -> str:
 def execute_database_query(query: str) -> str:
     """Function to query SQLite database with a provided SQL query."""
     cnx = get_postgresql_pooled_cnx()
-    response = ''
+    response = []
     if cnx == None:
         return response
     try:
-        cursor = cnx.cursor()
+        cursor = cnx.cursor(cursor_factory=RealDictCursor)
         cursor.execute(query)
         results = cursor.fetchall()
-        print('I am here..')
-        print(results)
         for data in results:
-            response += json.dumps(data, default=serialize_data)
+            response.append(json.dumps(data, default=serialize_data))
     except psycopg2.DatabaseError as e:
         print(f'Error at ask_database -> {e}')
     finally:
@@ -160,10 +159,4 @@ def run_execute_database_query(query) -> list:
         return execute_database_query(query)
     except psycopg2.DatabaseError as e:
         print(f"Error executing query: {e}")
-        return ''
-
-
-print(run_execute_database_query("""SELECT v.title as v_title
-FROM chatbotcourses c
-LEFT JOIN chatbotvendors v ON c.chatbotvendors_id = v.id 
-WHERE c.title LIKE '%IBM%' LIMIT 5;"""))
+        return []

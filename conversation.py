@@ -46,14 +46,14 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
             print(f'SQL Query -> {sql_query}')
             sql_response = run_execute_database_query(sql_query)
             print(f'SQL Response -> {sql_response}')
-            if sql_response == '':
+            if len(sql_response) == 0:
                 formatted_chat_history = [{
                     "role": "user",
                     "content": get_failed_sql_query_system_prompt(query, formatted_chat_history)
                 }]
                 second_response = chat_completion(
                     messages=formatted_chat_history,
-                    max_tokens=1024,
+                    max_tokens=512,
                     system=get_system_prompt()
                 )
                 chat_history[-1][1] = second_response.content[0].text
@@ -69,7 +69,7 @@ If there is a course URL in the SQL data only then provide it in the answer othe
 in the awnser. SQL data: {sql_response}"""}]
                 second_response = chat_completion(
                     messages=formatted_chat_history,
-                    max_tokens=2048,
+                    max_tokens=1024,
                     system=get_system_prompt()
                 )
                 chat_history[-1][1] = second_response.content[0].text

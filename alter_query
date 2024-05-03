@@ -1,0 +1,15 @@
+-- Step 1: Add a new integer array column
+ALTER TABLE your_table ADD COLUMN new_array_column INTEGER[];
+
+-- Step 2: Populate the new column by converting text to integer array
+UPDATE your_table
+SET new_array_column = CASE
+    WHEN text_array_column = '[]' THEN '{}'::INTEGER[] -- Converts empty text array to empty integer array
+    ELSE translate(text_array_column, '[]', '{}')::INTEGER[] -- Removes brackets and casts to integer array
+    END;
+
+-- Step 3: Drop the original text column
+ALTER TABLE your_table DROP COLUMN text_array_column;
+
+-- Step 4: Rename the new column to the original name
+ALTER TABLE your_table RENAME COLUMN new_array_column TO text_array_column;
