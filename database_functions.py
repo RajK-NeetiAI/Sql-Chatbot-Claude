@@ -133,7 +133,7 @@ def serialize_data(obj) -> str:
     raise TypeError(f"Object type not serializable - {type(obj)}")
 
 
-def execute_database_query(query: str) -> str:
+def execute_database_query(query: str) -> list[dict[str, str]] | list:
     """Function to query SQLite database with a provided SQL query."""
     cnx = get_postgresql_pooled_cnx()
     response = []
@@ -152,7 +152,7 @@ def execute_database_query(query: str) -> str:
     return response
 
 
-def run_execute_database_query(query) -> list:
+def run_execute_database_query(query: str) -> list[dict[str, str]] | list:
     '''Execute a query and return the results
     '''
     try:

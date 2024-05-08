@@ -1,3 +1,4 @@
+import anthropic
 from datetime import datetime
 
 from claude_api import chat_completion
@@ -36,12 +37,18 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
         system=get_system_prompt(),
         tools=tools
     )
-    print(response)
-    if len(response.content) > 1:
-        tool_call = response.content[1]
+    flag = False
+    for content in response.content:
+        if type(content) == anthropic.types.beta.tools.tool_use_block.ToolUseBlock:
+            flag = True
+    if flag:
+        for content in response.content:
+            if type(content) == anthropic.types.beta.tools.tool_use_block.ToolUseBlock:
+                tool_call = content
+                break
         function_name = tool_call.name
         function_args = tool_call.input
-        if function_name == 'ask_database':
+        if function_name == 'generate_sql_query':
             sql_query = function_args['query']
             print(f'SQL Query -> {sql_query}')
             sql_response = run_execute_database_query(sql_query)
@@ -60,13 +67,8 @@ def handle_chat_completion(chat_history: list[list]) -> list[list]:
                 print(f'Response -> {second_response.content[0].text}')
                 return chat_history
             else:
-                formatted_chat_history = [{
-                    "role": "user",
-                    "content": f"""Convert the following PostgreSQL data into natural language conversation, \
-keep the response short and concise and never mention id of the PostgreSQL data. \
-Consider today's date as {datetime.now().strftime("%b %d, %Y")}. \
-If there is a course URL in the SQL data only then provide it in the answer otherwise don't mention the URL \
-in the awnser. SQL data: {sql_response}"""}]
+                formatted_chat_history = get_successed_sql_query_system_prompt(
+                    sql_response)
                 second_response = chat_completion(
                     messages=formatted_chat_history,
                     max_tokens=1024,

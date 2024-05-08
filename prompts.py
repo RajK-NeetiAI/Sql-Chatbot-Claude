@@ -4,7 +4,7 @@ from datetime import datetime
 def get_tools(database_schema_string: str, database_definitions: str) -> list[dict]:
     tools = [
         {
-            "name": "ask_database",
+            "name": "generate_sql_query",
             "description": "Use this function to answer user questions about Production data. Input should be a fully formed MySQL query.",
             "input_schema": {
                 "type": "object",
@@ -12,10 +12,11 @@ def get_tools(database_schema_string: str, database_definitions: str) -> list[di
                     "query": {
                         "type": "string",
                         "description": f'''Generate a PostgreSQL query to extract information based on a user's question. \
+                        
 # Parameters: \
 # - Database Schema: {database_schema_string} \
 # - Data Definitions: {database_definitions} \
-# - Current Date: Use today's date in the format 'YYYY-MM-DD' where needed in the query. \
+# - Current Date: Use today's date as {datetime.now()} where needed in the query. \
 
 # Instructions: \
 # 1. Construct an SQL query using only the tables and columns listed in the provided schema. \
@@ -37,18 +38,43 @@ def get_tools(database_schema_string: str, database_definitions: str) -> list[di
 
 
 def get_failed_sql_query_system_prompt(query: str, formatted_chat_history: list[dict]) -> str:
-    failed_sql_query_system_prompt = f'''Consider yourselk as a helpful data analyst of Neeti AI. \
-A user has asked a question: {query}, in the context of the following chat history: \
-{formatted_chat_history}, politely reply that you don't have the answer for the question.'''
+    failed_sql_query_system_prompt = f'''Consider yourself as a helpful data analyst of Netcom Learning, use the chat history and query to reply. \
+
+# Parameters:
+# - Query: {query}
+# - Chat history: {formatted_chat_history}. \
+
+# Instructions:
+# 1. Politely reply that you don't have the answer for the question and don't explain the resoning.'''
     return failed_sql_query_system_prompt
 
 
-def get_format_sql_response_system_prompt() -> str:
-    sql_response_system_prompt = "Consider yourself as a helpful data analyst Neeti AI. \
-You help user get information about the data and answer their question."
-    return sql_response_system_prompt
+def get_successed_sql_query_system_prompt(sql_response: str) -> list[dict[str, str]]:
+    successed_sql_query_messages = [
+        {
+            "role": "user",
+            "content": f"""Explain PostgreSQL data in natural language, \
+            
+# Parameters: \
+# - SQL data: {sql_response}
+
+# Instructions: \
+# 1. Keep the response short and concise and never mention id of the PostgreSQL database. \
+# 2. If needed consider today's date as {datetime.now().strftime("%b %d, %Y")}. \
+# 3. If there is a course URL in the SQL data then use "https://www.netcomlearning.com/" to provide it in the answer otherwise don't mention the URL in the awnser. \
+# 4. Never mention that you are reading information from a SQL Database."""
+        }
+    ]
+    return successed_sql_query_messages
 
 
 def get_system_prompt() -> str:
-    system_prompt = "You are a data analyst of Neeti AI. You help user get information about the database."
+    system_prompt = """You are a data analyst of Netcom Learning. \
+You help user get information about the database. You convert user query into SQL query using the tool \
+"generate_sql_query". \
+
+# Instructions: \
+# 1. Always decide if you can use the tool "generate_sql_query" or not. \
+# 2. Use previous chat history to generate new SQL query. \
+# 3. Never generate fake data to answer the question."""
     return system_prompt
